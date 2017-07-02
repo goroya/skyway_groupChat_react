@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import 'webrtc-adapter';
 
+import Chance from 'chance';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {deepOrange500} from 'material-ui/styles/colors';
@@ -13,6 +14,7 @@ import TextField from 'material-ui/TextField';
 import './App.css';
 
 injectTapEventPlugin();
+const chance = new Chance();
 
 const muiTheme = getMuiTheme({
   palette: {
@@ -25,7 +27,7 @@ class App extends Component {
     super(props);
     this.state = {
       stage: 0,
-      roomName: 'HelloRoom',
+      roomName: `Room_${chance.string()}`,
       error_msg: 'none error',
       modal_open: false,
       localStream: null,
@@ -71,7 +73,7 @@ class App extends Component {
         console.log('peerjs open');
         const sfuRoom = peer.joinRoom(
           that.state.roomName,
-          {mode: 'sfu', stream: that.state.localStream}
+          {mode: 'mesh', stream: that.state.localStream}
         );
         sfuRoom.on('open', () => {
           console.log('room open');
@@ -182,11 +184,12 @@ class App extends Component {
     );
 
     const contents = () => {
+      let dom = "";
       switch (this.state.stage){
         case 0:
           break;
         case 1:
-          return (
+          dom = (
             <div>
               <TextField
                 value={this.state.roomName}
@@ -204,8 +207,11 @@ class App extends Component {
           );
           break;
         case 2:
-          return (
+          dom = (
             <div>
+              <h1>
+                RoomName is {this.state.roomName}
+              </h1>
               <video
                 ref={(myVideo) => {if(myVideo){ myVideo.srcObject = this.state.localStream} } }
                 style={{width: "200px"}}
@@ -216,8 +222,11 @@ class App extends Component {
               </div>
             </div>
           );
-          break
+          break;
+        default:
+          break;
       }
+      return dom;
     };
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
